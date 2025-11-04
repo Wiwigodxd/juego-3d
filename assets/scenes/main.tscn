@@ -1,14 +1,39 @@
-[gd_scene load_steps=9 format=3 uid="uid://de1pckuwl1o2x"]
+[gd_scene load_steps=19 format=3 uid="uid://de1pckuwl1o2x"]
 
 [ext_resource type="Script" uid="uid://dktplfgb7qg31" path="res://scripts/main.gd" id="1_kpi06"]
 [ext_resource type="PackedScene" uid="uid://dspm7og2jxmfp" path="res://assets/scenes/player.tscn" id="1_mr7gh"]
 [ext_resource type="PackedScene" uid="uid://bdgjf5isvfn1c" path="res://assets/scenes/mob.tscn" id="2_dfgan"]
+[ext_resource type="Texture2D" uid="uid://c3ynex1q3gunx" path="res://assets/images/ground.jpg" id="3_vesw4"]
+[ext_resource type="FontFile" uid="uid://cyxhh7ddkn62q" path="res://assets/fonts/Montserrat-Medium.ttf" id="4_etxf0"]
+[ext_resource type="Script" uid="uid://cnwiq6kdgtf0n" path="res://scripts/score_label.gd" id="5_vesw4"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vesw4"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_xplbd"]
+sky_material = SubResource("ProceduralSkyMaterial_vesw4")
+
+[sub_resource type="Environment" id="Environment_6rsl6"]
+background_mode = 2
+sky = SubResource("Sky_xplbd")
+tonemap_mode = 2
+glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4xowi"]
 size = Vector3(60, 2, 60)
 
 [sub_resource type="BoxMesh" id="BoxMesh_a202f"]
 size = Vector3(60, 2, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xplbd"]
+albedo_texture = ExtResource("3_vesw4")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6rsl6"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_p5d64"]
+material = SubResource("StandardMaterial3D_6rsl6")
+size = Vector2(20, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mr7gh"]
 albedo_color = Color(0.3529412, 0.1764706, 0.13333334, 1)
@@ -24,12 +49,16 @@ _data = {
 }
 point_count = 4
 
+[sub_resource type="Theme" id="Theme_xplbd"]
+default_font = ExtResource("4_etxf0")
+default_font_size = 22
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_kpi06")
 mob_scene = ExtResource("2_dfgan")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34079933, 31.601322, -2.3798485)
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_6rsl6")
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -41,6 +70,14 @@ shape = SubResource("BoxShape3D_4xowi")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("BoxMesh_a202f")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1.1, 0)
+material_override = SubResource("StandardMaterial3D_xplbd")
+mesh = SubResource("QuadMesh_p5d64")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.43978247, 0.8981043, 0, -0.8981043, 0.43978247, 0.34079933, 31.601322, -2.3798485)
 
 [node name="Player" parent="." instance=ExtResource("1_mr7gh")]
 collision_mask = 6
@@ -81,4 +118,23 @@ transform = Transform3D(-0.0033332484, 0, -0.99999446, 0, 1, 0, 0.99999446, 0, -
 wait_time = 0.5
 autostart = true
 
+[node name="UserInterface" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = SubResource("Theme_xplbd")
+
+[node name="ScoreLabel" type="Label" parent="UserInterface"]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 27.0
+offset_right = 168.0
+offset_bottom = 63.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 25
+text = "Puntuación: 0"
+script = ExtResource("5_vesw4")
+
+[connection signal="hit" from="Player" to="." method="_on_player_hit"]
 [connection signal="timeout" from="MobTimer" to="." method="_on_mob_timer_timeout"]
